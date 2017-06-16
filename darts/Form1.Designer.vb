@@ -22,28 +22,28 @@ Partial Class Form1
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        Me.components = New System.ComponentModel.Container
+        Me.components = New System.ComponentModel.Container()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form1))
-        Me.DartBoard = New System.Windows.Forms.PictureBox
-        Me.DartPins = New System.Windows.Forms.PictureBox
-        Me.btnTry = New System.Windows.Forms.Button
+        Me.DartBoard = New System.Windows.Forms.PictureBox()
+        Me.DartPins = New System.Windows.Forms.PictureBox()
+        Me.btnTry = New System.Windows.Forms.Button()
         Me.tmrMouseMove = New System.Windows.Forms.Timer(Me.components)
-        Me.Scoresheet = New System.Windows.Forms.DataGridView
-        Me.RoundScore = New System.Windows.Forms.DataGridViewTextBoxColumn
-        Me.ScoreLeft = New System.Windows.Forms.DataGridViewTextBoxColumn
-        Me.RecentThrows = New System.Windows.Forms.Label
-        Me.FocusLevel = New System.Windows.Forms.ProgressBar
-        Me.CurrentScore = New System.Windows.Forms.Label
-        Me.pnlSplash = New System.Windows.Forms.Panel
-        Me.btnSkip = New System.Windows.Forms.Button
-        Me.btnNext = New System.Windows.Forms.Button
-        Me.btnPrev = New System.Windows.Forms.Button
-        Me.lblGameGuide = New System.Windows.Forms.Label
-        Me.btnHelp = New System.Windows.Forms.Button
-        Me.btnPlay = New System.Windows.Forms.Button
-        Me.lblTitle = New System.Windows.Forms.Label
-        Me.btnExit = New System.Windows.Forms.Button
-        Me.picDemo = New System.Windows.Forms.PictureBox
+        Me.Scoresheet = New System.Windows.Forms.DataGridView()
+        Me.RoundScore = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.ScoreLeft = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.RecentThrows = New System.Windows.Forms.Label()
+        Me.FocusLevel = New System.Windows.Forms.ProgressBar()
+        Me.CurrentScore = New System.Windows.Forms.Label()
+        Me.pnlSplash = New System.Windows.Forms.Panel()
+        Me.btnSkip = New System.Windows.Forms.Button()
+        Me.btnNext = New System.Windows.Forms.Button()
+        Me.btnPrev = New System.Windows.Forms.Button()
+        Me.lblGameGuide = New System.Windows.Forms.Label()
+        Me.btnHelp = New System.Windows.Forms.Button()
+        Me.btnPlay = New System.Windows.Forms.Button()
+        Me.lblTitle = New System.Windows.Forms.Label()
+        Me.btnExit = New System.Windows.Forms.Button()
+        Me.picDemo = New System.Windows.Forms.PictureBox()
         CType(Me.DartBoard, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.DartPins, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.Scoresheet, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -199,10 +199,11 @@ Partial Class Form1
         'lblGameGuide
         '
         Me.lblGameGuide.AutoSize = True
-        Me.lblGameGuide.Location = New System.Drawing.Point(3, 27)
+        Me.lblGameGuide.Font = New System.Drawing.Font("Microsoft Sans Serif", 11.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblGameGuide.Location = New System.Drawing.Point(3, 10)
         Me.lblGameGuide.MaximumSize = New System.Drawing.Size(420, 0)
         Me.lblGameGuide.Name = "lblGameGuide"
-        Me.lblGameGuide.Size = New System.Drawing.Size(0, 13)
+        Me.lblGameGuide.Size = New System.Drawing.Size(0, 18)
         Me.lblGameGuide.TabIndex = 3
         Me.lblGameGuide.Visible = False
         '

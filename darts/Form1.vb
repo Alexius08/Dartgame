@@ -1,29 +1,25 @@
 Public Class Form1
-
-
-    Dim dartlocator(2), center As Point, dartcount As Byte = 0, totaldartcount As Byte = 0, recentthrow As Byte = 0, remainingscore As Int16 = 501
-    Dim x, y, crosshairsize, numrounds As Integer
-    Dim accuracy As Single = 0.8
-    Dim hasstopped As Boolean = True, isbusted As Boolean = False, isdone As Boolean = False, isplaying As Boolean = False, hasreadinstructions As Boolean = False
-    Dim indicator(2) As System.Drawing.Brush
-    Dim crosshairpen As New Pen(Color.Lime, 2), dartmarker(2, 3) As PointF, dartpen(2) As Pen
-    Dim dartscore(2) As String
+    Dim dartlocator(2) As Point, center As Point = New Point(277, 277)
+    Dim dartcount, totaldartcount, recentthrow As Byte
+    Dim remainingscore As Short = 501, x, y, crosshairsize, numrounds As Integer, accuracy As Single = 0.8
+    Dim hasstopped As Boolean = True, isbusted, isdone, isplaying, hasreadinstructions As Boolean
+    Dim indicator(2) As Brush, crosshairpen As New Pen(Color.Lime, 2)
+    Dim dartmarker(2, 3) As PointF, dartpen(2) As Pen, dartscore(2) As String
     Dim sectorheader() As Byte = {11, 14, 9, 12, 5, 20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8}
-    Dim instruction() As String = _
-    {"You begin with 501 points. The objective is to reduce the score to 0 points through hitting certain areas of the dartboard with varying point values.", _
-    "The center of the dartboard contains two zones: the outer bull's eye and the inner bull's eye. The outer bull's eye is worth 25 points, while the inner bull's eye is worth 50 points.", _
-    "A larger portion of the board is divided into 20 sectors. Each sector is marked with their value in points.", _
-    "There are two rings in the board, both colored red and green. The inner ring triples the score of its section, while the outer ring doubles the score. The outer ring also marks the border of the play area. All darts that go outside the outer ring will score nothing.", _
-    "Every turn, you can throw three darts. Click and hold the mouse button on your target. A bar will appear. Watch the bar before releasing the mouse button. The closer it is to being filled, the more accurate your throw will be.", _
-    "Your last throw for the game must land either in the double ring or the inner bull's eye. If you throw a dart that:" & Environment.NewLine & _
-    "1. reduces your score to 1;" & Environment.NewLine & _
-    "2. reduces your score to 0, yet didn't land in the double ring or in the inner bull's eye; or" & Environment.NewLine & _
-    "3. reduces your score to a negative value;" & Environment.NewLine & _
+    Dim instruction() As String =
+    {"You begin with 501 points. The objective is to reduce the score to 0 points through hitting certain areas of the dartboard with varying point values.",
+    "The center of the dartboard contains two zones: the outer bull's eye and the inner bull's eye. The outer bull's eye is worth 25 points, while the inner bull's eye is worth 50 points.",
+    "A larger portion of the board is divided into 20 sectors. Each sector is marked with their value in points.",
+    "There are two rings in the board, both colored red and green. The inner ring triples the score of its section, while the outer ring doubles the score. The outer ring also marks the border of the play area. All darts that go outside the outer ring will score nothing.",
+    "Every turn, you can throw three darts. Click and hold the mouse button on your target. A bar will appear. Watch the bar before releasing the mouse button. The closer it is to being filled, the more accurate your throw will be.",
+    "Your last throw for the game must land either in the double ring or the inner bull's eye. If you throw a dart that:" & Environment.NewLine &
+    "1. reduces your score to 1;" & Environment.NewLine &
+    "2. reduces your score to 0, yet didn't land in the double ring or in the inner bull's eye; or" & Environment.NewLine &
+    "3. reduces your score to a negative value;" & Environment.NewLine &
     "then, you go bust. You forfeit the rest of your turn and your score for that turn won't be counted."}
-    Dim page As Byte, isfirstplay As Boolean = True
-    Dim testdart, testdartmarker(3) As Point
+    Dim page As Byte, isfirstplay As Boolean = True, testdart, testdartmarker(3) As Point
 
-    Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+    Private Sub Form1_Load(ByVal sender As Object, ByVal e As EventArgs) Handles MyBase.Load
         DartPins.Parent = DartBoard
         picDemo.Parent = DartBoard
         FocusLevel.Parent = DartPins
@@ -31,15 +27,13 @@ Public Class Form1
         DartPins.Size = DartBoard.Size
         picDemo.Size = DartBoard.Size
         picDemo.Location = DartBoard.Location
-        center.X = 277
-        center.Y = 277
         crosshairsize = 250
         pnlSplash.Parent = picDemo
         pnlSplash.BackColor = Color.FromArgb(100, 255, 255, 255)
         numrounds = 0
     End Sub
 
-    Private Sub DartPins_MouseClick(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles DartPins.MouseClick
+    Private Sub DartPins_MouseClick(ByVal sender As Object, ByVal e As MouseEventArgs) Handles DartPins.MouseClick
         Dim angle, distance, randomangle(2) As Single, currentthrow As Byte, dartsize As Byte = 60
         angle = Rnd()
         distance = Rnd() * crosshairsize * (1 - accuracy) * (1 - 0.9 * FocusLevel.Value / FocusLevel.Maximum)
@@ -119,44 +113,43 @@ Public Class Form1
         DartPins.Invalidate()
     End Sub
 
-    Private Sub DartPins_MouseDown(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles DartPins.MouseDown
+    Private Sub DartPins_MouseDown(ByVal sender As Object, ByVal e As MouseEventArgs) Handles DartPins.MouseDown
         If dartcount <= 2 And Not isbusted And Not isdone Then
-            FocusLevel.Show()
-            If y < center.Y Then
-                FocusLevel.Top = y + crosshairsize * (1 - accuracy) + FocusLevel.Height
-            Else
-                FocusLevel.Top = y - crosshairsize * (1 - accuracy) - 2 * FocusLevel.Height
-            End If
-            FocusLevel.Left = x - (FocusLevel.Width / 2)
-            FocusLevel.Value = 0
+            With FocusLevel
+                .Show()
+                .Top = y + If(y < center.Y, crosshairsize * (1 - accuracy) + .Height,
+                -crosshairsize * (1 - accuracy) - 2 * .Height)
+                .Left = x - (.Width / 2)
+                .Value = 0
 
-            Dim sleeptime As Byte
-            Do While FocusLevel.Visible
-                Dim FocusLevelStep As SByte = 1, focuslevelincrease As Boolean
-                Application.DoEvents()
-                If FocusLevel.Value = 0 Then
-                    focuslevelincrease = True
-                ElseIf FocusLevel.Value = FocusLevel.Maximum Then
-                    focuslevelincrease = False
-                End If
-                Select Case FocusLevel.Value
-                    Case 0 To FocusLevel.Maximum / 4
-                        sleeptime = 20
-                    Case 1 + FocusLevel.Maximum / 4 To FocusLevel.Maximum / 2
-                        sleeptime = 15
-                    Case 1 + FocusLevel.Maximum / 2 To 3 * FocusLevel.Maximum / 4
-                        sleeptime = 10
-                    Case Else
-                        sleeptime = 5
-                End Select
-                If Not focuslevelincrease Then FocusLevelStep = -FocusLevelStep
-                FocusLevel.Increment(FocusLevelStep)
-                Threading.Thread.Sleep(sleeptime)
-            Loop
+                Dim sleeptime As Byte
+                Do While .Visible
+                    Dim FocusLevelStep As SByte = 1, focuslevelincrease As Boolean
+                    Application.DoEvents()
+                    If .Value = 0 Then
+                        focuslevelincrease = True
+                    ElseIf .Value = .Maximum Then
+                        focuslevelincrease = False
+                    End If
+                    Select Case .Value
+                        Case 0 To .Maximum / 4
+                            sleeptime = 40
+                        Case 1 + .Maximum / 4 To .Maximum / 2
+                            sleeptime = 30
+                        Case 1 + .Maximum / 2 To 3 * .Maximum / 4
+                            sleeptime = 20
+                        Case Else
+                            sleeptime = 10
+                    End Select
+                    If Not focuslevelincrease Then FocusLevelStep = -FocusLevelStep
+                    .Increment(FocusLevelStep)
+                    Threading.Thread.Sleep(sleeptime)
+                Loop
+            End With
         End If
     End Sub
 
-    Private Sub DartPins_MouseMove(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles DartPins.MouseMove
+    Private Sub DartPins_MouseMove(ByVal sender As Object, ByVal e As MouseEventArgs) Handles DartPins.MouseMove
         If Not FocusLevel.Visible Then
             accuracy = accuracy - 0.001
             hasstopped = False
@@ -173,11 +166,11 @@ Public Class Form1
         DartPins.Invalidate()
     End Sub
 
-    Private Sub DartPins_MouseUp(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles DartPins.MouseUp
+    Private Sub DartPins_MouseUp(ByVal sender As Object, ByVal e As MouseEventArgs) Handles DartPins.MouseUp
         FocusLevel.Hide()
     End Sub
 
-    Private Sub DartPins_Paint(ByVal sender As Object, ByVal e As System.Windows.Forms.PaintEventArgs) Handles DartPins.Paint
+    Private Sub DartPins_Paint(ByVal sender As Object, ByVal e As PaintEventArgs) Handles DartPins.Paint
         'DISPLAY CENTER WHEN CALIBRATING
         'e.Graphics.DrawLine(Pens.Cyan, center.X, 0, center.X, DartPins.Height)
         'e.Graphics.DrawLine(Pens.Cyan, 0, center.Y, DartPins.Width, center.Y)
@@ -188,17 +181,21 @@ Public Class Form1
                 Dim dartsize As Byte = 10
                 If ctr < dartcount Then
                     'draw pins
-                    e.Graphics.DrawLine(dartpen(ctr), dartmarker(ctr, 0), dartmarker(ctr, 2))
-                    e.Graphics.DrawLine(dartpen(ctr), dartmarker(ctr, 1), dartmarker(ctr, 3))
-                    e.Graphics.FillEllipse(indicator(ctr), dartlocator(ctr).X - (dartsize \ 2), dartlocator(ctr).Y - (dartsize \ 2), dartsize, dartsize)
+                    With e.Graphics
+                        .DrawLine(dartpen(ctr), dartmarker(ctr, 0), dartmarker(ctr, 2))
+                        .DrawLine(dartpen(ctr), dartmarker(ctr, 1), dartmarker(ctr, 3))
+                        .FillEllipse(indicator(ctr), dartlocator(ctr).X - (dartsize \ 2), dartlocator(ctr).Y - (dartsize \ 2), dartsize, dartsize)
+                    End With
                 End If
             Next
         End If
 
         'DRAW CROSSHAIR
-        e.Graphics.DrawEllipse(crosshairpen, x - crosshairsize * (1 - accuracy), y - crosshairsize * (1 - accuracy), crosshairsize * 2 * (1 - accuracy), crosshairsize * 2 * (1 - accuracy))
-        e.Graphics.DrawLine(crosshairpen, x, y - crosshairsize * (1 - accuracy), x, y + crosshairsize * (1 - accuracy))
-        e.Graphics.DrawLine(crosshairpen, x - crosshairsize * (1 - accuracy), y, x + crosshairsize * (1 - accuracy), y)
+        With e.Graphics
+            .DrawEllipse(crosshairpen, x - crosshairsize * (1 - accuracy), y - crosshairsize * (1 - accuracy), crosshairsize * 2 * (1 - accuracy), crosshairsize * 2 * (1 - accuracy))
+            .DrawLine(crosshairpen, x, y - crosshairsize * (1 - accuracy), x, y + crosshairsize * (1 - accuracy))
+            .DrawLine(crosshairpen, x - crosshairsize * (1 - accuracy), y, x + crosshairsize * (1 - accuracy), y)
+        End With
     End Sub
 
     Private Sub btnTry_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnTry.Click
@@ -238,8 +235,7 @@ Public Class Form1
         dartcount = 0
         recentthrow = 0
     End Sub
-
-    Private Sub tmrMouseMove_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles tmrMouseMove.Tick
+    Private Sub tmrMouseMove_Tick(ByVal sender As Object, ByVal e As EventArgs) Handles tmrMouseMove.Tick
         If Not FocusLevel.Visible Then
             If hasstopped Then
                 If accuracy < 0.8 Then accuracy = accuracy + 0.01
@@ -249,18 +245,14 @@ Public Class Form1
         End If
         DartPins.Invalidate()
     End Sub
-
-    Private Sub btnPlay_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnPlay.Click
+    Private Sub btnPlay_Click(ByVal sender As Object, ByVal e As EventArgs) Handles btnPlay.Click
         If Not isfirstplay Then
             startgame()
         Else
-            btnHelp_Click(sender, e)
+            showinstructions(True)
         End If
-
     End Sub
-
-    Private Sub btnExit_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnExit.Click
-
+    Private Sub btnExit_Click(ByVal sender As Object, ByVal e As EventArgs) Handles btnExit.Click
         If remainingscore > 0 Then
             If MsgBox("Abandon game?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
                 showstartscreen()
@@ -269,21 +261,10 @@ Public Class Form1
             showstartscreen()
         End If
     End Sub
-
-    Private Sub btnHelp_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnHelp.Click
-        btnHelp.Hide()
-        btnPlay.Hide()
-        lblTitle.Hide()
-        lblGameGuide.Show()
-        picDemo.Show()
-        page = 0
-        lblGameGuide.Text = instruction(page)
-        btnNext.Show()
-        If isfirstplay Then btnSkip.Show()
-        showtutorial(page)
+    Private Sub btnHelp_Click(ByVal sender As Object, ByVal e As EventArgs) Handles btnHelp.Click
+        showinstructions(False)
     End Sub
-
-    Private Sub btnNext_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnNext.Click
+    Private Sub btnNext_Click(ByVal sender As Object, ByVal e As EventArgs) Handles btnNext.Click
         page = page + 1
         lblGameGuide.Text = instruction(page)
         If page > 0 Then btnPrev.Show()
@@ -291,11 +272,13 @@ Public Class Form1
             btnNext.Hide()
             hasreadinstructions = True
         End If
-        If hasreadinstructions Then btnSkip.Text = "Play"
+        If hasreadinstructions And btnSkip.Text = "Skip" Then
+            btnSkip.Text = "Play"
+        End If
         showtutorial(page)
     End Sub
 
-    Private Sub btnPrev_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnPrev.Click
+    Private Sub btnPrev_Click(ByVal sender As Object, ByVal e As EventArgs) Handles btnPrev.Click
         page = page - 1
         lblGameGuide.Text = instruction(page)
         If page < 5 Then btnNext.Show()
@@ -303,8 +286,14 @@ Public Class Form1
         showtutorial(page)
     End Sub
 
-    Private Sub btnSkip_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnSkip.Click
-        startgame()
+    Private Sub btnSkip_Click(ByVal sender As Object, ByVal e As EventArgs) Handles btnSkip.Click
+        If btnSkip.Text = "Exit" Then
+            FocusLevel.Hide()
+            picDemo.Invalidate()
+            picDemo.Image = Nothing
+            showstartscreen()
+        Else startgame()
+        End If
     End Sub
 
     Private Sub showstartscreen()
@@ -324,12 +313,10 @@ Public Class Form1
         recentthrow = 0
         dartcount = 0
         totaldartcount = 0
-        Dim ctr As Byte
-        For ctr = 0 To 2
+        For ctr As Byte = 0 To 2
             dartlocator(ctr).X = 0
             dartlocator(ctr).Y = 0
-            Dim ctr2 As Byte
-            For ctr2 = 0 To 3
+            For ctr2 As Byte = 0 To 3
                 dartmarker(ctr, ctr2).X = 0
                 dartmarker(ctr, ctr2).Y = 0
             Next
@@ -407,8 +394,8 @@ Public Class Form1
                 FocusLevel.Left = x - (FocusLevel.Width / 2)
                 FocusLevel.Value = 0
 
-                Dim randomduration As Int16 = Rnd() * 5000, ctr As Int16
-                Dim sleeptime As Byte
+                Dim randomduration As Short = Rnd() * 5000, ctr As Short
+                Dim sleeptime As Short
 
                 Do
                     Dim FocusLevelStep As SByte = 1, focuslevelincrease As Boolean
@@ -422,11 +409,11 @@ Public Class Form1
                         Case 0 To FocusLevel.Maximum / 4
                             sleeptime = 100
                         Case 1 + FocusLevel.Maximum / 4 To FocusLevel.Maximum / 2
-                            sleeptime = 75
+                            sleeptime = 80
                         Case 1 + FocusLevel.Maximum / 2 To 3 * FocusLevel.Maximum / 4
-                            sleeptime = 50
+                            sleeptime = 70
                         Case Else
-                            sleeptime = 25
+                            sleeptime = 60
                     End Select
                     If Not focuslevelincrease Then FocusLevelStep = -FocusLevelStep
                     FocusLevel.Increment(FocusLevelStep)
@@ -461,20 +448,36 @@ Public Class Form1
         End Select
     End Sub
 
-    Private Sub picDemo_Paint(ByVal sender As Object, ByVal e As System.Windows.Forms.PaintEventArgs) Handles picDemo.Paint
+    Private Sub picDemo_Paint(ByVal sender As Object, ByVal e As PaintEventArgs) Handles picDemo.Paint
         If page = 4 Then
             Dim dartsize As Byte = 10, testdartpen As Pen = New Pen(Color.DarkCyan, 4), testdartcenter As Brush = Brushes.Cyan
             'draw pins in demo
             If testdart.X > 0 And testdart.Y > 0 Then
-                e.Graphics.DrawLine(testdartpen, testdartmarker(0), testdartmarker(2))
-                e.Graphics.DrawLine(testdartpen, testdartmarker(1), testdartmarker(3))
-                e.Graphics.FillEllipse(testdartcenter, testdart.X - (dartsize \ 2), testdart.Y - (dartsize \ 2), dartsize, dartsize)
-
+                With e.Graphics
+                    .DrawLine(testdartpen, testdartmarker(0), testdartmarker(2))
+                    .DrawLine(testdartpen, testdartmarker(1), testdartmarker(3))
+                    .FillEllipse(testdartcenter, testdart.X - (dartsize \ 2), testdart.Y - (dartsize \ 2), dartsize, dartsize)
+                End With
             End If
-            e.Graphics.DrawEllipse(crosshairpen, x - crosshairsize * (1 - accuracy), y - crosshairsize * (1 - accuracy), crosshairsize * 2 * (1 - accuracy), crosshairsize * 2 * (1 - accuracy))
-            e.Graphics.DrawLine(crosshairpen, x, y - crosshairsize * (1 - accuracy), x, y + crosshairsize * (1 - accuracy))
-            e.Graphics.DrawLine(crosshairpen, x - crosshairsize * (1 - accuracy), y, x + crosshairsize * (1 - accuracy), y)
-
+            With e.Graphics
+                .DrawEllipse(crosshairpen, x - crosshairsize * (1 - accuracy), y - crosshairsize * (1 - accuracy), crosshairsize * 2 * (1 - accuracy), crosshairsize * 2 * (1 - accuracy))
+                .DrawLine(crosshairpen, x, y - crosshairsize * (1 - accuracy), x, y + crosshairsize * (1 - accuracy))
+                .DrawLine(crosshairpen, x - crosshairsize * (1 - accuracy), y, x + crosshairsize * (1 - accuracy), y)
+            End With
         End If
+    End Sub
+
+    Private Sub showinstructions(ByVal PlayButtonPress As Boolean)
+        btnHelp.Hide()
+        btnPlay.Hide()
+        lblTitle.Hide()
+        lblGameGuide.Show()
+        picDemo.Show()
+        page = 0
+        lblGameGuide.Text = instruction(page)
+        btnNext.Show()
+        btnSkip.Text = If(isfirstplay And PlayButtonPress, "Skip", "Exit")
+        btnSkip.Show()
+        showtutorial(page)
     End Sub
 End Class
